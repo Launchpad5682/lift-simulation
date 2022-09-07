@@ -1,0 +1,105 @@
+:root {
+    font-size: 62.5%;
+    --padding-sm: 20px;
+}
+
+body {
+    font-size: 1.6rem;
+    overflow: auto;
+}
+
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+#container {
+    display: flex;
+    width: 100%;
+    height: 100vh;
+    overflow: auto;
+    padding: var(--padding-sm);
+    position: relative;
+}
+
+.lift-btns {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    background-color: black;
+    color: white;
+}
+
+.lift-btns:hover {
+    background-color: white;
+    color: black;
+}
+
+.up-btn {}
+
+.down-btn {}
+
+.btns-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    height: 100%;
+    background-color: pink;
+    width: fit-content;
+    padding: 0 var(--padding-sm);
+}
+
+.floors-container {
+    display: flex;
+    flex-direction: column;
+    height: max-content;
+    width: 100%;
+    gap: 1rem;
+    padding: var(--padding-sm);
+    padding-top: 5px;
+    overflow: auto;
+}
+
+.floor-container {
+    width: 100%;
+    height: 10rem;
+    display: flex;
+    flex-direction: row;
+    background-color: aqua;
+}
+
+.floor-partition {
+    width: 100%;
+    height: 3px;
+    background-color: green;
+    margin-top: auto;
+}
+
+.lift-container {
+    position: absolute;
+}
+
+
+/*Lift Styling*/
+.lift {
+    height: 10rem;
+    width: 8rem;
+    background-color: gray;
+    position: absolute;
+    display: flex;
+    overflow: hidden;
+}
+
+.lift-doors {
+    display: flex;
+    width: 4rem;
+    height: 100%;
+    background-color: black;
+    border: 1px solid white;
+    transition: linear 2s all;
+}
+
+.lift-transition {
+    transition: linear 2s all;
+}
