@@ -191,17 +191,17 @@ function callNearestLift(mode, destination) {
     }
   }
 
-  console.log(`${liftID} ${liftFloor} calling nearest lift`);
+  // console.log(`${liftID} ${liftFloor} calling nearest lift`);
   if (liftID !== null && allocateLift !== false) {
-    console.log("Entering lift idle update");
-    console.log(`${liftID} ${liftFloor} calling nearest lift`);
+    // console.log("Entering lift idle update");
+    // console.log(`${liftID} ${liftFloor} calling nearest lift`);
     state.lifts[liftID].idle = false;
     state.lifts[liftID].destination = destination;
-    console.log(
-      state.lifts[liftID].destination,
-      destination,
-      "from setting floor"
-    );
+    // console.log(
+    //   state.lifts[liftID].destination,
+    //   destination,
+    //   "from setting floor"
+    // );
   }
   // return the id of the lift
   return { liftID, liftFloor, alreadyAllocated };
@@ -211,7 +211,7 @@ function callNearestLift(mode, destination) {
 function callLift(event) {
   if (event.target.tagName === "BUTTON") {
     const { level, mode } = event.target.dataset;
-    console.log(level, mode);
+    // console.log(level, mode);
     allocateLift(level, mode);
   }
 }
@@ -250,7 +250,7 @@ function moveLiftUp(lift, level, liftID) {
         state.lifts[liftID].destination = null;
         state.lifts[liftID].currentDirection = null;
         state.lifts[liftID].queue = [];
-        console.log(state.lifts);
+        // console.log(state.lifts);
         clearInterval(timer);
       }
     }
@@ -287,7 +287,6 @@ function moveLiftDown(lift, level, liftID) {
         lift.style.transform = `translateY(${
           -(state.lifts[liftID].currentLevel - 1) * 11
         }rem)`;
-        console.log(currentLevel, level);
         state.lifts[liftID].currentLevel--;
       } else {
         state.lifts[liftID].currentLevel = Number(level);
@@ -295,7 +294,7 @@ function moveLiftDown(lift, level, liftID) {
         state.lifts[liftID].destination = null;
         state.lifts[liftID].currentDirection = null;
         state.lifts[liftID].queue = [];
-        console.log(state.lifts);
+        // console.log(state.lifts);
         clearInterval(timer);
       }
     }
@@ -311,11 +310,11 @@ function allocateLift(level, mode) {
     const diff = level - liftFloor;
     console.log(diff);
     if (diff > 0) {
-      console.log("Moving lift up");
+      // console.log("Moving lift up");
       moveLiftUp(lift, level, liftID);
       state.lifts[liftID].currentDirection = "up";
     } else if (diff < 0) {
-      console.log("Moving lift down");
+      // console.log("Moving lift down");
       moveLiftDown(lift, level, liftID);
       state.lifts[liftID].currentDirection = "down";
     } else {
@@ -330,16 +329,25 @@ function allocateLift(level, mode) {
   }
 }
 
-const container = document.getElementById("container");
-const floors = generateFloors(5);
-container.appendChild(floors);
-generateLifts(3);
+// Form handling
 
-// const liftDoorLeft = document.createElement("div");
-// const liftDoorRight = document.createElement("div");
+function submitHandler(event) {
+  event.preventDefault();
+  const noOfFloors = Number(inputFloors.value);
+  const noOfLifts = Number(inputLifts.value);
 
-// liftDoorLeft.dataset.liftDoor = `lift-left-${id}`;
-// liftDoorRight.dataset.liftDoor = `lift-right-${id}`;
+  // reset values
+  inputFloors.value = "";
+  inputLifts.value = "";
 
-// liftDoorLeft.classList.add("lift-doors");
-// liftDoorRight.classList.add("lift-doors");
+  const container = document.getElementById("container");
+  const floors = generateFloors(noOfFloors);
+  container.appendChild(floors);
+  generateLifts(noOfLifts);
+}
+
+const inputFloors = document.getElementById("input-floors");
+const inputLifts = document.getElementById("input-lifts");
+const submitBtn = document.getElementById("submit-btn");
+
+submitBtn.addEventListener("click", submitHandler);

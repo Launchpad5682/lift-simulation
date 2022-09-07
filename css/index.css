@@ -103,3 +103,13 @@ body {
 .lift-transition {
     transition: linear 2s all;
 }
+
+/* input form */
+
+.form {
+    display: flex;
+    flex-direction: column;
+    max-width: 20rem;
+    gap: 1rem;
+    margin: auto;
+}
