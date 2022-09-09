@@ -254,7 +254,7 @@ function moveLiftUp(lift, level, liftID) {
         clearInterval(timer);
       }
     }
-  }, 2500);
+  }, 100);
 }
 
 function moveLiftDown(lift, level, liftID) {
@@ -298,7 +298,7 @@ function moveLiftDown(lift, level, liftID) {
         clearInterval(timer);
       }
     }
-  }, 2500);
+  }, 100);
 }
 
 // Lift Manager allocating the lifts
