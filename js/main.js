@@ -1,5 +1,14 @@
+/**
+ * floors: {
+ *    1: {
+ *      up: true/false,
+ *      down: true/false,
+ *    }
+ * }
+ */
 const state = {
   lifts: [],
+  floors: {},
 };
 
 function createLiftDoors(id) {
@@ -150,61 +159,79 @@ function callNearestLift(mode, destination) {
   let liftID = null;
   let nearestDistance = Number.MAX_VALUE;
   let liftFloor = null;
-  for (let i = 0; i < length; i++) {
-    const distance = Math.abs(state.lifts[i].currentLevel - liftDestination);
-    console.log(
-      !state.lifts[i].idle,
-      state.lifts[i].currentDirection === mode,
-      Number(destination),
-      Number(state.lifts[i].destination)
-    );
-    if (
-      !state.lifts[i].idle &&
-      state.lifts[i].currentDirection === mode &&
-      mode === "up" &&
-      Number(destination) < Number(state.lifts[i].destination) &&
-      Number(destination) > Number(state.lifts[i].currentLevel)
-    ) {
-      console.log(`adding to ${i} lift new destination`);
-      state.lifts[i].queue.push(Number(destination));
-      alreadyAllocated = true;
-      break;
-    } else if (
-      !state.lifts[i].idle &&
-      state.lifts[i].currentDirection === mode &&
-      mode === "down" &&
-      Number(destination) > Number(state.lifts[i].destination) &&
-      Number(destination) < Number(state.lifts[i].currentLevel)
-    ) {
-      state.lifts[i].queue.push(Number(destination));
-      alreadyAllocated = true;
-      break;
-    } else if (
-      state.lifts[i].idle &&
-      distance < nearestDistance &&
-      !state.lifts[i].currentDirection &&
-      !state.lifts[i].destination
-    ) {
-      nearestDistance = distance;
-      liftID = i;
-      liftFloor = state.lifts[i].currentLevel;
+  let doNothing = false;
+
+  if (
+    state.floors[destination] === undefined ||
+    !state.floors[destination][mode]
+  ) {
+    if (state.floors[destination] === undefined) {
+      state.floors[destination] = {};
     }
+    state.floors[destination][mode] = true;
+    for (let i = 0; i < length; i++) {
+      const distance = Math.abs(state.lifts[i].currentLevel - liftDestination);
+      console.log(
+        !state.lifts[i].idle,
+        state.lifts[i].currentDirection === mode,
+        Number(destination),
+        Number(state.lifts[i].destination)
+      );
+      if (
+        !state.lifts[i].idle &&
+        state.lifts[i].currentDirection === mode &&
+        mode === "up" &&
+        Number(destination) < Number(state.lifts[i].destination) &&
+        Number(destination) > Number(state.lifts[i].currentLevel)
+      ) {
+        console.log(`adding to ${i} lift new destination`);
+        state.lifts[i].queue.push(Number(destination));
+        alreadyAllocated = true;
+        break;
+      } else if (
+        !state.lifts[i].idle &&
+        state.lifts[i].currentDirection === mode &&
+        mode === "down" &&
+        Number(destination) > Number(state.lifts[i].destination) &&
+        Number(destination) < Number(state.lifts[i].currentLevel)
+      ) {
+        state.lifts[i].queue.push(Number(destination));
+        alreadyAllocated = true;
+        break;
+      } else if (
+        state.lifts[i].idle &&
+        distance < nearestDistance &&
+        !state.lifts[i].currentDirection &&
+        !state.lifts[i].destination
+      ) {
+        nearestDistance = distance;
+        liftID = i;
+        liftFloor = state.lifts[i].currentLevel;
+      }
+    }
+
+    // console.log(`${liftID} ${liftFloor} calling nearest lift`);
+    if (liftID !== null && allocateLift !== false) {
+      // console.log("Entering lift idle update");
+      // console.log(`${liftID} ${liftFloor} calling nearest lift`);
+      state.lifts[liftID].idle = false;
+      state.lifts[liftID].destination = destination;
+      // console.log(
+      //   state.lifts[liftID].destination,
+      //   destination,
+      //   "from setting floor"
+      // );
+    }
+  } else {
+    doNothing = true;
   }
 
-  // console.log(`${liftID} ${liftFloor} calling nearest lift`);
-  if (liftID !== null && allocateLift !== false) {
-    // console.log("Entering lift idle update");
-    // console.log(`${liftID} ${liftFloor} calling nearest lift`);
-    state.lifts[liftID].idle = false;
-    state.lifts[liftID].destination = destination;
-    // console.log(
-    //   state.lifts[liftID].destination,
-    //   destination,
-    //   "from setting floor"
-    // );
-  }
   // return the id of the lift
-  return { liftID, liftFloor, alreadyAllocated };
+  return { liftID, liftFloor, alreadyAllocated, doNothing };
+}
+
+function deallocateLift(mode, destination) {
+  state.floors[destination][mode] = false;
 }
 
 // external response - calling from outside the lift
@@ -216,7 +243,7 @@ function callLift(event) {
   }
 }
 
-function moveLiftUp(lift, level, liftID) {
+function moveLiftUp(lift, level, liftID, mode) {
   let isPaused = false;
   const timer = setInterval(() => {
     if (!isPaused) {
@@ -250,6 +277,7 @@ function moveLiftUp(lift, level, liftID) {
         state.lifts[liftID].destination = null;
         state.lifts[liftID].currentDirection = null;
         state.lifts[liftID].queue = [];
+        deallocateLift(mode, level);
         // console.log(state.lifts);
         clearInterval(timer);
       }
@@ -257,7 +285,7 @@ function moveLiftUp(lift, level, liftID) {
   }, 500);
 }
 
-function moveLiftDown(lift, level, liftID) {
+function moveLiftDown(lift, level, liftID, mode) {
   let isPaused = false;
 
   const timer = setInterval(() => {
@@ -279,6 +307,7 @@ function moveLiftDown(lift, level, liftID) {
         setTimeout(() => openLiftDoors(liftID), 2000);
         setTimeout(() => {
           closeLiftDoors(liftID);
+
           isPaused = false;
         }, 5000);
       }
@@ -294,6 +323,7 @@ function moveLiftDown(lift, level, liftID) {
         state.lifts[liftID].destination = null;
         state.lifts[liftID].currentDirection = null;
         state.lifts[liftID].queue = [];
+        deallocateLift(mode, level);
         // console.log(state.lifts);
         clearInterval(timer);
       }
@@ -303,19 +333,22 @@ function moveLiftDown(lift, level, liftID) {
 
 // Lift Manager allocating the lifts
 function allocateLift(level, mode) {
-  const { liftID, liftFloor, alreadyAllocated } = callNearestLift(mode, level);
+  const { liftID, liftFloor, alreadyAllocated, doNothing } = callNearestLift(
+    mode,
+    level
+  );
   const lift = document.querySelector(`[data-lift-no="${liftID}"]`);
 
-  if (lift && !alreadyAllocated) {
+  if (lift && !alreadyAllocated && !doNothing) {
     const diff = level - liftFloor;
     console.log(diff);
     if (diff > 0) {
       // console.log("Moving lift up");
-      moveLiftUp(lift, level, liftID);
+      moveLiftUp(lift, level, liftID, mode);
       state.lifts[liftID].currentDirection = "up";
     } else if (diff < 0) {
       // console.log("Moving lift down");
-      moveLiftDown(lift, level, liftID);
+      moveLiftDown(lift, level, liftID, mode);
       state.lifts[liftID].currentDirection = "down";
     } else {
       setTimeout(() => openLiftDoors(liftID), 2000);
@@ -324,6 +357,7 @@ function allocateLift(level, mode) {
         state.lifts[liftID].idle = true;
         state.lifts[liftID].destination = null;
         state.lifts[liftID].currentDirection = null;
+        deallocateLift(mode, level);
       }, 5000);
     }
   }
