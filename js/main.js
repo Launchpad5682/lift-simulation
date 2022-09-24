@@ -378,6 +378,10 @@ function submitHandler(event) {
   const floors = generateFloors(noOfFloors);
   container.appendChild(floors);
   generateLifts(noOfLifts);
+
+  // disable form
+  const form = document.getElementsByClassName("form")[0];
+  form.style.display = "none";
 }
 
 const inputFloors = document.getElementById("input-floors");
